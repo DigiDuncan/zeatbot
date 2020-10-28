@@ -1,6 +1,9 @@
+import logging
 import socket
 
 NEWLINE = "\r\n"
+
+logger = logging.getLogger("sizebot")
 
 
 class IRC:
@@ -19,7 +22,7 @@ class IRC:
 
     def sendmsg(self, message):
         self.socket.send(("PRIVMSG #" + self.streamername + " :" + message + NEWLINE).encode())
-        print("***" + self.displayname + ": " + message)
+        logger.info("***" + self.displayname + ": " + message)
 
     def pong(self):
         self.socket.send("PONG %s\r\n")

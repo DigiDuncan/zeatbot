@@ -1,2 +1,4 @@
 .vscode/*
 *.pyc
+dev.bat
+authtoken.txt

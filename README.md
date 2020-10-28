@@ -2,6 +2,8 @@
 It's a bot for Zeat. It's zeatbot.
 
 ## How to Use
+Make sure you have [Python 3](https://www.python.org/downloads/) installed.
+
 To start, place a file called `authtoken.txt` in the root directory of this folder (the same folder this `README.md` is in.) This file should only contain a Twitch authtoken, and should look something like this:
 ```
 oauth:0123456789abcdefghijklmnopqrst

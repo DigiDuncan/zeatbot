@@ -9,6 +9,6 @@ To start, place a file called `authtoken.txt` in the root directory of this fold
 oauth:0123456789abcdefghijklmnopqrst
 ```
 
-Included with **zeatbot** is a `run.bat` file in the root directory. If you're Zeat, this has been tailored to you and should "just work." If you're not Zeat, or your forking this repo to make your own bot, you'll need to either change that file to do the equivalent of launching `zeatbot/main.py` as a Python module on your system.
+Included with **zeatbot** is a `run.bat` file in the root directory. If you're Zeat, this has been tailored to you and should "just work." If you're not Zeat, or you're forking this repo to make your own bot, you'll need to either change that file to do the equivalent of launching `zeatbot/main.py` as a Python module on your system.
 
-`firsttime.bat` runs a first-time setup, ensuring you have all the required Python packages. You can alsmo do this yourself by installing all the rquirements in `requirements.txt` yourself.
+`firsttime.bat` runs a first-time setup, ensuring you have all the required Python packages. You can also do this yourself by installing all the rquirements in `requirements.txt` yourself.

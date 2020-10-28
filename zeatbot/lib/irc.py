@@ -3,7 +3,7 @@ import socket
 
 NEWLINE = "\r\n"
 
-logger = logging.getLogger("sizebot")
+logger = logging.getLogger("zeatbot")
 
 
 class IRC:

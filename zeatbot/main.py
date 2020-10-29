@@ -21,3 +21,4 @@ logger.addHandler(dfhandler)
 irc = IRC(oauth = conf.oauth, streamername = conf.streamername,
           botname = conf.botname, displayname = conf.displayname)
 irc.connect()
+logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")

@@ -16,3 +16,8 @@ logger = logging.getLogger("zeatbot")
 logger.handlers = []
 logger.propagate = False
 logger.addHandler(dfhandler)
+
+
+irc = IRC(oauth = conf.oauth, streamername = conf.streamername,
+          botname = conf.botname, displayname = conf.displayname)
+irc.connect()

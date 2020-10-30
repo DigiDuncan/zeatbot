@@ -20,7 +20,7 @@ def weather(irc, city):
     r_json = requests.get(url_string)
     if r_json["error"]:
         irc.sendmsg(f"{city} is not a valid location.")
-        logger.info(f"Didn't send weather info for {location}.")
+        logger.info(f"Didn't send weather info for {city}.")
         return
     loc = r_json["location"]
     location = f"{loc['name']}, {loc['region']}, {loc['country']}"

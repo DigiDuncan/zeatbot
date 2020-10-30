@@ -1,3 +1,4 @@
+from base64 import b64decode
 import importlib.resources as pkg_resources
 import logging
 from pathlib import Path
@@ -18,12 +19,16 @@ streamername = None
 displayname = None
 timedmessagedelay = None
 oauth = None
+weather_token = None
 
 
 def load():
     global prefix, botname, streamername, displayname, timedmessagedelay, oauth
+    global weather_token
+
     configDict = toml.load(confpath)
 
+    # Settings
     if utils.hasPath(configDict, "settings.prefix"):
         prefix = utils.getPath(configDict, "settings.prefix")
     if utils.hasPath(configDict, "settings.botname"):
@@ -34,11 +39,17 @@ def load():
         displayname = utils.getPath(configDict, "settings.displayname")
     if utils.hasPath(configDict, "settings.timedmessagedelay"):
         timedmessagedelay = utils.getPath(configDict, "settings.timedmessagedelay")
+
+    # Load bot authtoken
     try:
         with open(oauthpath) as f:
             oauth = f.readlines()
     except FileNotFoundError:
         logger.error("OAuth token not found! Cannot log in.")
+
+    # Load API authtokens
+    if utils.hasPath(configDict, "tokens.weather"):
+        weather_token = str(b64decode(utils.getPath(configDict, "tokens.weather")))
 
 
 # Force load when the module loads.

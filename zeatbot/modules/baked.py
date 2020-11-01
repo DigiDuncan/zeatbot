@@ -18,6 +18,9 @@ def on_message(irc, message):
         city = removeprefix(message.content, f"{conf.prefix}weather").strip()
         logger.info(f"{message.nick} requested weather info {city}.")
         weather(irc, city)
+    elif message.content.startswith(f"{conf.prefix}say"):
+        saystring = removeprefix(message.content, f"{conf.prefix}say").strip()
+        irc.sendmsg(saystring)
 
 
 # Commands
@@ -30,8 +33,8 @@ def weather(irc, city):
         return
     loc = r_json["location"]
     location = f"{loc['name']}, {loc['region']}, {loc['country']}"
-    temptime = loc['localtime']
-    timearrow = arrow.get(temptime, "YYYY-MM-DD H:mm")
+    temptime = loc['localtime'] + " " + loc['tz_id']
+    timearrow = arrow.get(temptime, "YYYY-MM-DD H:mm ZZZ")
     time = timearrow.format("DD MMM YYYY") + ", " + timearrow.format("hh:mm") + " (" + timearrow.format("ZZZ") + " time)"
     condition = r_json["current"]["condition"]["text"]
     humidity = f"{r_json['current']['humidity']}%"

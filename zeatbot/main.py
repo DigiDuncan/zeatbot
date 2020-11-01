@@ -21,9 +21,12 @@ logger.addHandler(dfhandler)
 
 
 def main():
+    conf.load()
+
     irc = IRC(oauth = conf.oauth, streamername = conf.streamername,
               botname = conf.botname, displayname = conf.displayname)
     irc.connect()
+    irc.sendmsg("I'm online!")
     logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
 
     while True:
@@ -31,4 +34,4 @@ def main():
         if (message.command == "PING"):
             irc.pong()
         else:
-            baked.on_message()
+            baked.on_message(irc, message)

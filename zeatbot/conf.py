@@ -10,8 +10,8 @@ from zeatbot.lib import utils
 
 logger = logging.getLogger("zeatbot")
 
-confpath = pkg_resources.read_text(zeatbot.data, "settings.ini")
-oauthpath = Path(__file__).resolve().parent / "authtoken.txt"
+conftext = pkg_resources.read_text(zeatbot.data, "settings.ini")
+oauthpath = Path(__file__).resolve().parent.parent / "authtoken.txt"
 
 prefix = None
 botname = None
@@ -26,7 +26,7 @@ def load():
     global prefix, botname, streamername, displayname, timedmessagedelay, oauth
     global weather_token
 
-    configDict = toml.load(confpath)
+    configDict = toml.loads(conftext)
 
     # Settings
     if utils.hasPath(configDict, "settings.prefix"):
@@ -34,7 +34,7 @@ def load():
     if utils.hasPath(configDict, "settings.botname"):
         botname = utils.getPath(configDict, "settings.botname")
     if utils.hasPath(configDict, "settings.streamername"):
-        streamername = utils.getPath(configDict, "settings.streamername")
+        streamername = utils.getPath(configDict, "settings.streamername").lower()
     if utils.hasPath(configDict, "settings.displayname"):
         displayname = utils.getPath(configDict, "settings.displayname")
     if utils.hasPath(configDict, "settings.timedmessagedelay"):
@@ -43,14 +43,10 @@ def load():
     # Load bot authtoken
     try:
         with open(oauthpath) as f:
-            oauth = f.readlines()
+            oauth = f.readline()
     except FileNotFoundError:
         logger.error("OAuth token not found! Cannot log in.")
 
     # Load API authtokens
     if utils.hasPath(configDict, "tokens.weather"):
-        weather_token = str(b64decode(utils.getPath(configDict, "tokens.weather")))
-
-
-# Force load when the module loads.
-load()
+        weather_token = b64decode(utils.getPath(configDict, "tokens.weather")).decode(encoding="utf-8")

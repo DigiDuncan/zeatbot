@@ -1,6 +1,6 @@
-from base64 import b64decode
 import importlib.resources as pkg_resources
 import logging
+from base64 import b64decode
 from pathlib import Path
 
 import toml

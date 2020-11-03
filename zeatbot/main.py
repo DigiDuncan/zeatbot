@@ -7,7 +7,7 @@ from digiformatter import logger as digilogger
 from zeatbot import conf
 from zeatbot.lib.irc import IRC
 
-from zeatbot.modules import baked
+from zeatbot.modules import baked, customs
 
 
 # Set up logging
@@ -35,4 +35,7 @@ def main():
         if (message.command == "PING"):
             irc.pong()
         else:
+            if message.command != "PRIVMSG":
+                return
             baked.on_message(irc, message)
+            customs.on_message(irc, message)

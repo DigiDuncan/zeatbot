@@ -31,6 +31,7 @@ def main():
 
     while True:
         message = irc.readmsg()
+        logger.info(message)
         if (message.command == "PING"):
             irc.pong()
         else:

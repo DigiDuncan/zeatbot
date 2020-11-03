@@ -11,7 +11,6 @@ logger = logging.getLogger("zeatbot")
 
 
 def on_message(irc, message):
-    logger.info(message)
     if message.command != "PRIVMSG":
         return
     if message.content.startswith(f"{conf.prefix}weather"):

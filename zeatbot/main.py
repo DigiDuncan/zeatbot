@@ -30,8 +30,10 @@ def main():
         logger.error(f"Configuration file not found: {e.filename}")
         logger.warn("Writing default settings file...")
         default_settings = pkg_resources.read_text(zeatbot.data, "settings.ini")
-        with open(e.filename) as f:
+        with open(e.filename, "w") as f:
             f.write(default_settings)
+        logger.info("Please reload the bot.")
+        return
 
     irc = IRC(oauth = conf.oauth, streamername = conf.streamername,
               botname = conf.botname, displayname = conf.displayname)

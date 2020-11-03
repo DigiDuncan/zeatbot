@@ -39,7 +39,7 @@ def try_customs(irc, message):
         return
     customstext = pkg_resources.read_text(zeatbot.data, "commands.ini")
     customs = toml.loads(customstext)
-    for k, v in customs.items():
+    for k, v in customs["commands"].items():
         if k == cmd:
             irc.sendmsg(do_replacements(v, message))
             return

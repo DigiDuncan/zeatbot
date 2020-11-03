@@ -34,8 +34,6 @@ def main():
         logger.info(message)
         if (message.command == "PING"):
             irc.pong()
-        else:
-            if message.command != "PRIVMSG":
-                return
+        elif message.command == "PRIVMSG":
             baked.on_message(irc, message)
             customs.on_message(irc, message)

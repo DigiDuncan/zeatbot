@@ -4,6 +4,7 @@
 
 import importlib.resources as pkg_resources
 import logging
+from pathlib import Path
 
 from digiformatter import logger as digilogger
 
@@ -30,6 +31,7 @@ def main():
         logger.error(f"Configuration file not found: {e.filename}")
         logger.warn("Writing default settings file...")
         default_settings = pkg_resources.read_text(zeatbot.data, "settings.ini")
+        Path(e.filename).parent.mkdir(parents = True, exist_ok = True)
         with open(e.filename, "w") as f:
             f.write(default_settings)
         logger.info("Please reload the bot.")

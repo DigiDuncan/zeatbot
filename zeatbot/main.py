@@ -2,11 +2,14 @@
 # by DigiDuncan
 # http://github.com/DigiDuncan/zeatbot
 
+import importlib.resources as pkg_resources
 import logging
+
 from digiformatter import logger as digilogger
+
+import zeatbot.data
 from zeatbot import conf
 from zeatbot.lib.irc import IRC
-
 from zeatbot.modules import baked, customs
 
 
@@ -21,7 +24,14 @@ logger.addHandler(dfhandler)
 
 
 def main():
-    conf.load()
+    try:
+        conf.load()
+    except FileNotFoundError as e:
+        logger.error(f"Configuration file not found: {e.filename}")
+        logger.warn("Writing default settings file...")
+        default_settings = pkg_resources.read_text(zeatbot.data, "settings.ini")
+        with open(e.filename) as f:
+            f.write(default_settings)
 
     irc = IRC(oauth = conf.oauth, streamername = conf.streamername,
               botname = conf.botname, displayname = conf.displayname)

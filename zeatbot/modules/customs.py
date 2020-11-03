@@ -1,10 +1,8 @@
-import importlib.resources as pkg_resources
 import logging
 
 import arrow
 import toml
 
-import zeatbot.data
 from zeatbot import conf
 from zeatbot.lib.utils import removeprefix
 
@@ -37,8 +35,14 @@ def try_customs(irc, message):
     cmd = removeprefix(message.content, conf.prefix).split()[0]
     if cmd in baked_cmds:
         return
-    customstext = pkg_resources.read_text(zeatbot.data, "commands.ini")
-    customs = toml.loads(customstext)
+    customsfile = conf.customsfile
+    try:
+        customs = toml.loads(customsfile)
+    except FileNotFoundError:
+        logger.warn("Commands file not found. Making a blank one.")
+        with open(customsfile) as f:
+            f.write("[commands]\r\n")
+        return
     for k, v in customs["commands"].items():
         if k == cmd:
             irc.sendmsg(do_replacements(v, message))
@@ -53,12 +57,10 @@ def add(irc, args):
         irc.sendmsg("Invalid !add command.")
         logger.warn(f"Invalid !add command: !add {args}")
         return
-    customstext = pkg_resources.read_text(zeatbot.data, "commands.ini")
-    customs = toml.loads(customstext)
+    customs = toml.load(conf.customsfile)
     if newcmd in customs or newcmd in baked_cmds:
         irc.sendmsg(f"{newcmd} is already a command!")
         logger.warn(f"Tried to add {newcmd}, but it's already a command!")
         return
     customs[newcmd] = newout
-    with open(pkg_resources.open_text(zeatbot.data, "commands.ini")) as f:
-        f.write(toml.dumps(customs))
+    toml.dump(customs, conf.customsfile)

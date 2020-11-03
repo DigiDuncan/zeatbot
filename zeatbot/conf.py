@@ -1,17 +1,27 @@
-import importlib.resources as pkg_resources
 import logging
 from base64 import b64decode
 from pathlib import Path
 
+import appdirs
 import toml
 
-import zeatbot.data
 from zeatbot.lib import utils
 
 logger = logging.getLogger("zeatbot")
 
-conftext = pkg_resources.read_text(zeatbot.data, "settings.ini")
-oauthpath = Path(__file__).resolve().parent.parent / "authtoken.txt"
+
+def getDataDir():
+    appname = "zeatbot"
+    appauthor = "DigiDuncan"
+    datadir = Path(appdirs.user_data_dir(appname, appauthor))
+    return datadir
+
+
+datadir = getDataDir()
+conffile = datadir / "settings.ini"
+customsfile = datadir / "commands.ini"
+timersfile = datadir / "timers.txt"
+oauthpath = datadir / "authtoken.txt"
 
 prefix = None
 botname = None
@@ -26,7 +36,7 @@ def load():
     global prefix, botname, streamername, displayname, timedmessagedelay, oauth
     global weather_token
 
-    configDict = toml.loads(conftext)
+    configDict = toml.load(conffile)
 
     # Settings
     if utils.hasPath(configDict, "settings.prefix"):
@@ -44,9 +54,12 @@ def load():
     try:
         with open(oauthpath) as f:
             oauth = f.readline()
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         logger.error("OAuth token not found! Cannot log in.")
+        logger.warning(f"Place an authtoken file at {e.filename}.")
 
     # Load API authtokens
     if utils.hasPath(configDict, "tokens.weather"):
         weather_token = b64decode(utils.getPath(configDict, "tokens.weather")).decode(encoding="utf-8")
+    else:
+        logger.error("Weather token missing! Contact DigiDuncan. The weather command will not work.")

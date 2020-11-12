@@ -4,6 +4,7 @@
 
 import importlib.resources as pkg_resources
 import logging
+import threading
 from pathlib import Path
 
 from digiformatter import logger as digilogger
@@ -11,7 +12,7 @@ from digiformatter import logger as digilogger
 import zeatbot.data
 from zeatbot import conf
 from zeatbot.lib.irc import IRC
-from zeatbot.modules import baked, customs
+from zeatbot.modules import baked, customs, timers
 
 
 # Set up logging
@@ -43,7 +44,7 @@ def main():
     irc.sendmsg("I'm online!")
     logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
 
-    while True:
+    def on_message():
         message = irc.readmsg()
         logger.info(message)
         if (message.command == "PING"):
@@ -51,3 +52,6 @@ def main():
         elif message.command == "PRIVMSG":
             baked.on_message(irc, message)
             customs.on_message(irc, message)
+
+    threading.Thread(name="on_message", target=on_message, daemon=True).start()
+    threading.Thread(name="timers", target=timers.loop(irc, conf.timedmessagedelay), daemon=True).start()

@@ -54,4 +54,4 @@ def main():
             customs.on_message(irc, message)
 
     threading.Thread(name="on_message", target=on_message, daemon=True).start()
-    threading.Thread(name="timers", target=timers.loop(irc, conf.timedmessagedelay), daemon=True).start()
+    # threading.Thread(name="timers", target=timers.loop(irc, conf.timedmessagedelay), daemon=True).start()

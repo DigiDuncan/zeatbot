@@ -56,7 +56,7 @@ def load():
     # Load bot authtoken
     try:
         with open(oauthpath) as f:
-            oauth = f.readline()
+            oauth = f.readline().strip()
     except FileNotFoundError as e:
         logger.error("OAuth token not found! Cannot log in.")
         logger.warning(f"Place an authtoken file at {e.filename}.")
@@ -64,7 +64,7 @@ def load():
     # Load client ID
     try:
         with open(clientidpath) as f:
-            clientid = f.readline()
+            clientid = f.readline().strip()
     except FileNotFoundError as e:
         logger.error("Client ID not found! Cannot log in.")
         logger.warning(f"Place an client ID file at {e.filename}.")

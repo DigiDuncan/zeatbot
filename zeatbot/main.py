@@ -45,6 +45,9 @@ async def main():
     await irc.sendmsg("I'm online!")
     logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
 
+    client = TwitchClient(client_id=conf.clientid, oauth_token=conf.oauth)
+    channel = client.channels.get()
+
     asyncio.create_task(timers.loop(irc))
     while True:
         message = await irc.readmsg()

@@ -10,10 +10,7 @@ logger = logging.getLogger("zeatbot")
 
 def getTimedMessages():
     try:
-        with open(conf.timersfile, encoding="utf-8") as f:
-            messages = f.readlines()
-            for t in messages:
-                t = t.strip()
+        messages = conf.timersfile.read_text(encoding="utf-8").splitlines()
     except EnvironmentError:
         raise Exception("Couldn't load timers file! Ignoring.")
     return messages
@@ -21,6 +18,9 @@ def getTimedMessages():
 
 @errlogger
 async def loop(irc):
+    if conf.timedmessagedelay == 0:
+        return
+    delay_in_seconds = max(conf.timedmessagedelay, 1) * 60
     timed_messages = getTimedMessages()
     messages_to_send = []
     while True:
@@ -31,4 +31,4 @@ async def loop(irc):
         message = messages_to_send.pop()
         await irc.sendmsg(message)
         logger.info(f"Sent timer {message!r}")
-        await asyncio.sleep(conf.timedmessagedelay * 60)
+        await asyncio.sleep(delay_in_seconds)

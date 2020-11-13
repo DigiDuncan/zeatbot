@@ -51,7 +51,7 @@ def load():
     if utils.hasPath(configDict, "settings.displayname"):
         displayname = utils.getPath(configDict, "settings.displayname")
     if utils.hasPath(configDict, "settings.timedmessagedelay"):
-        timedmessagedelay = utils.getPath(configDict, "settings.timedmessagedelay")
+        timedmessagedelay = utils.getPath(configDict, "settings.timedmessagedelay", 1)
 
     # Load bot authtoken
     try:

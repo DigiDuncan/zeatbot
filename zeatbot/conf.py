@@ -22,6 +22,7 @@ conffile = datadir / "settings.ini"
 customsfile = datadir / "commands.ini"
 timersfile = datadir / "timers.txt"
 oauthpath = datadir / "authtoken.txt"
+clientidpath = datadir / "client_id.txt"
 
 prefix = None
 botname = None
@@ -29,11 +30,13 @@ streamername = None
 displayname = None
 timedmessagedelay = None
 oauth = None
+clientid = None
 weather_token = None
 
 
 def load():
-    global prefix, botname, streamername, displayname, timedmessagedelay, oauth
+    global prefix, botname, streamername, displayname, timedmessagedelay
+    global oauth, clientid
     global weather_token
 
     configDict = toml.load(conffile)
@@ -57,6 +60,14 @@ def load():
     except FileNotFoundError as e:
         logger.error("OAuth token not found! Cannot log in.")
         logger.warning(f"Place an authtoken file at {e.filename}.")
+
+    # Load client ID
+    try:
+        with open(clientidpath) as f:
+            clientid = f.readline()
+    except FileNotFoundError as e:
+        logger.error("Client ID not found! Cannot log in.")
+        logger.warning(f"Place an client ID file at {e.filename}.")
 
     # Load API authtokens
     if utils.hasPath(configDict, "tokens.weather"):

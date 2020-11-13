@@ -8,6 +8,7 @@ import threading
 from pathlib import Path
 
 from digiformatter import logger as digilogger
+from twitch import TwitchClient
 
 import zeatbot.data
 from zeatbot import conf

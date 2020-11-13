@@ -3,3 +3,4 @@ arrow
 digiformatter
 requests
 toml
+python-twitch-client

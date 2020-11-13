@@ -61,7 +61,7 @@ async def on_message(irc, message):
 
 
 def run():
-    asyncio.run(main)
+    asyncio.run(main())
 
 
 if __name__ == "__main__":

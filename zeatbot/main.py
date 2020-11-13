@@ -41,16 +41,16 @@ async def main():
 
     irc = IRC(oauth = conf.oauth, streamername = conf.streamername,
               botname = conf.botname, displayname = conf.displayname)
-    irc.connect()
-    irc.sendmsg("I'm online!")
+    await irc.connect()
+    await irc.sendmsg("I'm online!")
     logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
 
     asyncio.create_task(timers.loop(irc))
     while True:
-        message = irc.readmsg()
+        message = await irc.readmsg()
         logger.info(message)
         if (message.command == "PING"):
-            irc.pong()
+            await irc.pong()
         elif (message.command == "PRIVMSG"):
             asyncio.create_task(on_message(irc, message))
 

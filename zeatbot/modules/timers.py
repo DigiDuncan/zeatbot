@@ -29,6 +29,6 @@ async def loop(irc):
             messages_to_send = timed_messages.copy()
             random.shuffle(messages_to_send)
         message = messages_to_send.pop()
-        irc.sendmsg(message)
+        await irc.sendmsg(message)
         logger.info(f"Sent timer {message!r}")
         await asyncio.sleep(conf.timedmessagedelay * 60)

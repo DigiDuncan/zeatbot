@@ -1,6 +1,6 @@
 import logging
 import re
-import socket
+import asyncio
 
 logger = logging.getLogger("zeatbot")
 
@@ -91,16 +91,17 @@ class IRC:
         self.streamername = streamername
         self.botname = botname
         self.displayname = displayname
-        self.socket = socket.socket()
+        self.reader = None
+        self.writer = None
         self.readbuffer = b""
 
-    def connect(self):
-        self.socket.connect(("irc.twitch.tv", 6667))
-        self.send(f"PASS {self.oauth}")
-        self.send(f"NICK {self.botname}")
-        self.send(f"JOIN #{self.streamername}")
+    async def connect(self):
+        self.reader, self.writer = await asyncio.open_connection("irc.twitch.tv", 6667)
+        await self.send(f"PASS {self.oauth}")
+        await self.send(f"NICK {self.botname}")
+        await self.send(f"JOIN #{self.streamername}")
 
-    def readmsg(self):
+    async def readmsg(self):
         while True:
             # Look for the next endline
             msgend = self.readbuffer.find(b"\r\n")
@@ -108,7 +109,7 @@ class IRC:
             if msgend != -1:
                 break
             # If endline is not found, read 1024 more bytes, and check again
-            self.readbuffer = self.readbuffer + self.socket.recv(1024)
+            self.readbuffer += await self.reader.read(1024)
 
         # If there's an endline, then get the new message, and leave the rest of the data for later
         msgbytes = self.readbuffer[:msgend]
@@ -119,16 +120,17 @@ class IRC:
         msg = Message.parse(msgstr)
         return msg
 
-    def sendmsg(self, message):
+    async def sendmsg(self, message):
         try:
-            self.send(f"PRIVMSG #{self.streamername} :{message}")
+            await self.send(f"PRIVMSG #{self.streamername} :{message}")
             logger.info("***" + self.displayname + ": " + message)
         except Exception as e:
             logger.warn("***" + self.displayname + ": <Couldn't send message.>")
             print(e)
 
-    def pong(self):
-        self.send("PONG")
+    async def pong(self):
+        await self.send("PONG")
 
-    def send(self, s):
-        self.socket.send(f"{s}\r\n".encode())
+    async def send(self, s):
+        self.writer.write(f"{s}\r\n".encode())
+        await self.writer.drain()

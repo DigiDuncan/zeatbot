@@ -18,10 +18,10 @@ baked_cmds = [
 
 @errlogger
 async def on_message(irc, message):
-    try_customs(irc, message)
+    await try_customs(irc, message)
     if message.content.startswith(f"{conf.prefix}add"):
         args = removeprefix(message.content, f"{conf.prefix}add").strip()
-        add(irc, args)
+        await add(irc, args)
 
 
 def do_replacements(s, message):
@@ -33,7 +33,7 @@ def do_replacements(s, message):
     return s
 
 
-def try_customs(irc, message):
+async def try_customs(irc, message):
     cmd = removeprefix(message.content, conf.prefix).split()[0]
     if cmd in baked_cmds:
         return
@@ -47,21 +47,21 @@ def try_customs(irc, message):
         return
     for k, v in customs["commands"].items():
         if k == cmd:
-            irc.sendmsg(do_replacements(v, message))
+            await irc.sendmsg(do_replacements(v, message))
             return
 
 
 # Commands.
-def add(irc, args):
+async def add(irc, args):
     newcmd = args.split()[0]
     newout = removeprefix(args, args.split()[0]).strip()
     if not (newcmd and newout):
-        irc.sendmsg(f"Invalid {conf.prefix}add command.")
+        await irc.sendmsg(f"Invalid {conf.prefix}add command.")
         logger.warn(f"Invalid {conf.prefix}add command: {conf.prefix}add {args}")
         return
     customs = toml.load(conf.customsfile)
     if newcmd in customs or newcmd in baked_cmds:
-        irc.sendmsg(f"{newcmd} is already a command!")
+        await irc.sendmsg(f"{newcmd} is already a command!")
         logger.warn(f"Tried to add {newcmd}, but it's already a command!")
         return
     customs["commands"][newcmd] = newout
@@ -69,15 +69,15 @@ def add(irc, args):
         toml.dump(customs, f)
 
 
-def remove(irc, args):
+async def remove(irc, args):
     cmd = args.split()[0]
     if not cmd:
-        irc.sendmsg(f"Invalid {conf.prefix}remove command.")
+        await irc.sendmsg(f"Invalid {conf.prefix}remove command.")
         logger.warn(f"Invalid {conf.prefix}remove command: {conf.prefix}remove {args}")
         return
     customs = toml.load(conf.customsfile)
     if cmd not in customs:
-        irc.sendmsg(f"{cmd} is not a command!")
+        await irc.sendmsg(f"{cmd} is not a command!")
         logger.warn(f"Tried to remove {cmd}, but it's not a command!")
         return
     del customs["commands"][cmd]

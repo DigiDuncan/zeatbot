@@ -4,8 +4,8 @@
 
 import importlib.resources as pkg_resources
 import logging
-import threading
 from pathlib import Path
+import asyncio
 
 from digiformatter import logger as digilogger
 from twitch import TwitchClient
@@ -26,7 +26,7 @@ logger.propagate = False
 logger.addHandler(dfhandler)
 
 
-def main():
+async def main():
     try:
         conf.load()
     except FileNotFoundError as e:
@@ -45,14 +45,24 @@ def main():
     irc.sendmsg("I'm online!")
     logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
 
-    def on_message():
+    asyncio.create_task(timers.loop(irc))
+    while True:
         message = irc.readmsg()
         logger.info(message)
         if (message.command == "PING"):
             irc.pong()
-        elif message.command == "PRIVMSG":
-            baked.on_message(irc, message)
-            customs.on_message(irc, message)
+        elif (message.command == "PRIVMSG"):
+            asyncio.create_task(on_message(irc, message))
 
-    threading.Thread(name="on_message", target=on_message, daemon=True).start()
-    # threading.Thread(name="timers", target=timers.loop(irc, conf.timedmessagedelay), daemon=True).start()
+
+async def on_message(irc, message):
+    asyncio.create_task(baked.on_message(irc, message))
+    asyncio.create_task(customs.on_message(irc, message))
+
+
+def run():
+    asyncio.run(main)
+
+
+if __name__ == "__main__":
+    run()

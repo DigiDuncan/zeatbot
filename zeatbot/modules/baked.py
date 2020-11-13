@@ -5,12 +5,13 @@ import requests
 import arrow
 
 from zeatbot import conf
-from zeatbot.lib.utils import removeprefix
+from zeatbot.lib.utils import removeprefix, errlogger
 
 logger = logging.getLogger("zeatbot")
 
 
-def on_message(irc, message):
+@errlogger
+async def on_message(irc, message):
     if message.content.startswith(f"{conf.prefix}weather"):
         city = removeprefix(message.content, f"{conf.prefix}weather").strip()
         logger.info(f"{message.nick} requested weather info {city}.")

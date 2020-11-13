@@ -1,33 +1,34 @@
 import logging
 import random
-import time
+import asyncio
 
 from zeatbot import conf
+from zeatbot.lib.utils import errlogger
 
 logger = logging.getLogger("zeatbot")
 
-try:
-    with open(conf.timersfile, encoding="utf-8") as f:
-        timers = f.readlines()
-        for t in timers:
-            t = t.strip()
-except EnvironmentError:
-    logger.error("Couldn't load timers file! Ignoring.")
-    timers = None
 
-currentpool = timers
+def getTimedMessages():
+    try:
+        with open(conf.timersfile, encoding="utf-8") as f:
+            messages = f.readlines()
+            for t in messages:
+                t = t.strip()
+    except EnvironmentError:
+        raise Exception("Couldn't load timers file! Ignoring.")
+    return messages
 
 
-def loop(irc, minutes):
+@errlogger
+async def loop(irc):
+    timed_messages = getTimedMessages()
+    messages_to_send = []
     while True:
-        global currentpool
-
-        if currentpool is None:
-            return
-        message = currentpool.pop(random.randrange(len(currentpool)))
+        if not messages_to_send:
+            logger.info("Out of timers! Refueling.")
+            messages_to_send = timed_messages.copy()
+            random.shuffle(messages_to_send)
+        message = messages_to_send.pop()
         irc.sendmsg(message)
         logger.info(f"Sent timer {message!r}")
-        if currentpool == []:
-            logger.info("Out of timers! Refueling.")
-            currentpool = timers
-        time.sleep(minutes * 60)
+        asyncio.sleep(conf.timedmessagedelay * 60)

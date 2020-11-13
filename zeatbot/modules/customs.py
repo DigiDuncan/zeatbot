@@ -4,7 +4,7 @@ import arrow
 import toml
 
 from zeatbot import conf
-from zeatbot.lib.utils import removeprefix
+from zeatbot.lib.utils import removeprefix, errlogger
 
 logger = logging.getLogger("zeatbot")
 
@@ -16,7 +16,8 @@ baked_cmds = [
 ]
 
 
-def on_message(irc, message):
+@errlogger
+async def on_message(irc, message):
     try_customs(irc, message)
     if message.content.startswith(f"{conf.prefix}add"):
         args = removeprefix(message.content, f"{conf.prefix}add").strip()

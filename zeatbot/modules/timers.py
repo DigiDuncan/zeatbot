@@ -31,4 +31,4 @@ async def loop(irc):
         message = messages_to_send.pop()
         irc.sendmsg(message)
         logger.info(f"Sent timer {message!r}")
-        asyncio.sleep(conf.timedmessagedelay * 60)
+        await asyncio.sleep(conf.timedmessagedelay * 60)

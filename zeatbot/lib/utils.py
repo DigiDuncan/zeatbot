@@ -7,9 +7,9 @@ logger = logging.getLogger("zeatbot")
 
 def errlogger(fn):
     @wraps(fn)
-    def wrapped(*args, **kwargs):
+    async def wrapped(*args, **kwargs):
         try:
-            fn(*args, **kwargs)
+            await fn(*args, **kwargs)
         except Exception as e:
             logger.error(e)
     return wrapped

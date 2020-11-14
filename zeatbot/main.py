@@ -46,7 +46,8 @@ async def main():
     logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
 
     client = TwitchClient(client_id=conf.clientid, oauth_token=conf.oauth)
-    channel = client.channels.get()
+    (zeatuser,) = client.users.translate_usernames_to_ids(["zeat"])
+    zeatchannel = client.channels.get_by_id(zeatuser.id)
 
     asyncio.create_task(timers.loop(irc))
     while True:

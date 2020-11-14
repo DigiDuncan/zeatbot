@@ -13,7 +13,7 @@ from twitch import TwitchClient
 import zeatbot.data
 from zeatbot import conf
 from zeatbot.lib.irc import IRC
-from zeatbot.modules import baked, customs, timers
+from zeatbot.modules import baked, customs, timers, twitch
 
 
 # Set up logging
@@ -24,6 +24,11 @@ logger = logging.getLogger("zeatbot")
 logger.handlers = []
 logger.propagate = False
 logger.addHandler(dfhandler)
+
+asynciologger = logging.getLogger("asyncio")
+asynciologger.handlers = []
+asynciologger.propagate = False
+asynciologger.addHandler(dfhandler)
 
 
 async def main():
@@ -46,8 +51,8 @@ async def main():
     logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
 
     client = TwitchClient(client_id=conf.clientid, oauth_token=conf.oauth)
-    (zeatuser,) = client.users.translate_usernames_to_ids(["zeat"])
-    zeatchannel = client.channels.get_by_id(zeatuser.id)
+    (zeatuser,) = client.users.translate_usernames_to_ids([conf.streamername])
+    channel = client.channels.get_by_id(zeatuser.id)
 
     asyncio.create_task(timers.loop(irc))
     while True:
@@ -56,12 +61,13 @@ async def main():
         if (message.command == "PING"):
             await irc.pong()
         elif (message.command == "PRIVMSG"):
-            asyncio.create_task(on_message(irc, message))
+            asyncio.create_task(on_message(irc, client, channel, message))
 
 
-async def on_message(irc, message):
+async def on_message(irc, client, channel, message):
     asyncio.create_task(baked.on_message(irc, message))
     asyncio.create_task(customs.on_message(irc, message))
+    asyncio.create_task(twitch.on_message(irc, client, channel, message))
 
 
 def run():

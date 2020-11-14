@@ -17,6 +17,8 @@ async def on_message(irc, message):
         logger.info(f"{message.nick} requested weather info {city}.")
         await weather(irc, city)
     elif message.content.startswith(f"{conf.prefix}say"):
+        if message.nick != conf.streamername:
+            return
         saystring = removeprefix(message.content, f"{conf.prefix}say").strip()
         await irc.sendmsg(saystring)
 

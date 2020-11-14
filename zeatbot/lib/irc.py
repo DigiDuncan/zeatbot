@@ -97,7 +97,7 @@ class IRC:
 
     async def connect(self):
         self.reader, self.writer = await asyncio.open_connection("irc.twitch.tv", 6667)
-        await self.send(f"PASS {self.oauth}")
+        await self.send(f"PASS oauth:{self.oauth}")
         await self.send(f"NICK {self.botname}")
         await self.send(f"JOIN #{self.streamername}")
 

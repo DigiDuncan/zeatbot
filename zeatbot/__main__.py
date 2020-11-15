@@ -1,4 +1,4 @@
-from zeatbot.main import run
+from zeatbot.main import main
 
 if __name__ == "__main__":
-    run()
+    main()

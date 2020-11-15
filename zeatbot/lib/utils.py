@@ -1,18 +1,7 @@
 import re
 import logging
-from functools import wraps
 
 logger = logging.getLogger("zeatbot")
-
-
-def errlogger(fn):
-    @wraps(fn)
-    async def wrapped(*args, **kwargs):
-        try:
-            await fn(*args, **kwargs)
-        except Exception as e:
-            logger.error(e)
-    return wrapped
 
 
 def tryInt(val):

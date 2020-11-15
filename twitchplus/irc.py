@@ -2,7 +2,7 @@ import logging
 import re
 import asyncio
 
-logger = logging.getLogger("zeatbot")
+logger = logging.getLogger(__name__)
 
 NEWLINE = "\r\n"
 
@@ -29,6 +29,7 @@ PARAM_RE = re.compile(" +([^ \x00\r\n]*)")
 
 
 class Message:
+    __slots__ = ["nick", "user", "host", "command", "params", "tags", "raw"]
     def __init__(self, nick=None, user=None, host=None, command=None, params=None, tags=None, raw=None):
         self.command = command or ""
         self.nick = nick or ""
@@ -43,6 +44,12 @@ class Message:
         if self.command != "PRIVMSG":
             return None
         return self.params[1]
+
+    @property
+    def channel(self):
+        if self.command != "PRIVMSG":
+            return None
+        return self.params[0]
 
     @classmethod
     def parse(cls, s):
@@ -81,56 +88,48 @@ class Message:
 
     def __str__(self):
         if self.command == "PRIVMSG":
-            return f"{self.nick}: {self.content}"
+            return f"[{self.channel}] {self.nick}: {self.content}"
         return f"{self.raw}"
 
 
 class IRC:
-    def __init__(self, oauth, streamername, botname, displayname):
-        self.oauth = oauth
-        self.streamername = streamername
-        self.botname = botname
-        self.displayname = displayname
-        self.reader = None
-        self.writer = None
-        self.readbuffer = b""
+    __slots__ = ["nick", "_reader", "_writer", "_readbuffer"]
+    def __init__(self, nick):
+        self.nick = nick
+        self._reader, self._writer = None, None
+        self._readbuffer = b""
 
-    async def connect(self):
-        self.reader, self.writer = await asyncio.open_connection("irc.twitch.tv", 6667)
-        await self.send(f"PASS oauth:{self.oauth}")
-        await self.send(f"NICK {self.botname}")
-        await self.send(f"JOIN #{self.streamername}")
+    async def connect(self, server, port, *, password=None):
+        self._reader, self._writer = await asyncio.open_connection(server, port)
+        if password is not None:
+            await self._send(f"PASS {password}")
+        await self._send(f"NICK {self.nick}")
+        
+    async def join(self, channel):
+        await self._send(f"JOIN {channel}")
 
     async def readmsg(self):
-        while True:
-            # Look for the next endline
-            msgend = self.readbuffer.find(b"\r\n")
-            # If endline is found, parse next message
-            if msgend != -1:
-                break
-            # If endline is not found, read 1024 more bytes, and check again
-            self.readbuffer += await self.reader.read(1024)
+        msgbytes = await self._reader.readuntil(b"\r\n")
+        msgbytes = msgbytes[:-2]
 
-        # If there's an endline, then get the new message, and leave the rest of the data for later
-        msgbytes = self.readbuffer[:msgend]
-        self.readbuffer = self.readbuffer[msgend + 2:]
-
-        # Parse the message string into a Message object and return it
+        # Parse the message string into a Message object
         msgstr = str(msgbytes, "utf-8")
         msg = Message.parse(msgstr)
+        logger.debug(f"> {msg}")
+
+        # Automatically handle PINGs
+        if msg.command == "PING":
+            await self.pong()
+
         return msg
 
-    async def sendmsg(self, message):
-        try:
-            await self.send(f"PRIVMSG #{self.streamername} :{message}")
-            logger.info("***" + self.displayname + ": " + message)
-        except Exception as e:
-            logger.warn("***" + self.displayname + ": <Couldn't send message.>")
-            print(e)
+    async def send(self, channel, message):
+        await self._send(f"PRIVMSG {channel} :{message}")
+        logger.debug(f"< [{channel}]: {message}")
 
     async def pong(self):
-        await self.send("PONG")
+        await self._send("PONG")
 
-    async def send(self, s):
-        self.writer.write(f"{s}\r\n".encode())
-        await self.writer.drain()
+    async def _send(self, s):
+        self._writer.write(f"{s}\r\n".encode())
+        await self._writer.drain()

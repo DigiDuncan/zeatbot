@@ -5,19 +5,18 @@
 import importlib.resources as pkg_resources
 import logging
 from pathlib import Path
-import asyncio
 
 from digiformatter import logger as digilogger
-from twitch import TwitchClient
 
 import zeatbot.data
 from zeatbot import conf
-from zeatbot.lib.irc import IRC
 from zeatbot.modules import baked, customs, timers, twitch
+
+from twitchplus import Bot
 
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 dfhandler = digilogger.DigiFormatterHandler()
 
 logger = logging.getLogger("zeatbot")
@@ -31,7 +30,7 @@ asynciologger.propagate = False
 asynciologger.addHandler(dfhandler)
 
 
-async def main():
+def main():
     try:
         conf.load()
     except FileNotFoundError as e:
@@ -44,35 +43,20 @@ async def main():
         logger.info("Please reload the bot.")
         return
 
-    irc = IRC(oauth = conf.oauth, streamername = conf.streamername,
-              botname = conf.botname, displayname = conf.displayname)
-    await irc.connect()
-    await irc.sendmsg("I'm online!")
-    logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
+    bot = Bot(nick=conf.botname, prefix=conf.prefix)
+    baked.register(bot)
+    customs.register(bot)
+    twitch.register(bot)
+    timers.register(bot)
 
-    client = TwitchClient(client_id=conf.clientid, oauth_token=conf.oauth)
-    (zeatuser,) = client.users.translate_usernames_to_ids([conf.streamername])
-    channel = client.channels.get_by_id(zeatuser.id)
+    @bot.on_ready
+    async def on_ready(): 
+        channel = bot.get_channel(conf.streamername)
+        logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
+        await channel.send("I'm online!")
 
-    asyncio.create_task(timers.loop(irc))
-    while True:
-        message = await irc.readmsg()
-        logger.info(message)
-        if (message.command == "PING"):
-            await irc.pong()
-        elif (message.command == "PRIVMSG"):
-            asyncio.create_task(on_message(irc, client, channel, message))
-
-
-async def on_message(irc, client, channel, message):
-    asyncio.create_task(baked.on_message(irc, message))
-    asyncio.create_task(customs.on_message(irc, message))
-    asyncio.create_task(twitch.on_message(irc, client, channel, message))
-
-
-def run():
-    asyncio.run(main())
+    bot.run(conf.clientid, conf.oauth, channels=[f"{conf.streamername}"])
 
 
 if __name__ == "__main__":
-    run()
+    main()

@@ -140,7 +140,7 @@ class Bot():
 
     def get_user(self, name):
         userid = self.get_user_id(name)
-        userjson = self.tawpi.users.get_by_id(userid)
+        userjson = self.twapi.users.get_by_id(userid)
         user = User.from_json(self, userjson)
         self._user_ids[user.name] = user.id
         return user

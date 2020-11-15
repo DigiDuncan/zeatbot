@@ -25,7 +25,7 @@ class Stream:
     preview_template: str
 
     @classmethod
-    def from_json(cls, bot, j):
+    def from_json(cls, bot: Bot, j: dict) -> Stream:
         if j is None:
             return None
         return cls(

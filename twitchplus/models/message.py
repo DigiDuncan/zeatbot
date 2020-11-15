@@ -1,28 +1,36 @@
-class Message:
-    __slots__ = ["bot", "content", "prefix", "channel", "command", "args", "fullargs", "nick"]
-    def __init__(self, bot):
-        self.bot = bot
-        self.content = ""
-        self.prefix = None
-        self.channel = None
-        self.command = None
-        self.args = None
-        self.fullargs = None
-        self.nick = None
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from twitchplus import Bot, Channel, Stream, irc
 
-    def get_channel(self):
+from dataclasses import dataclass
+
+
+@dataclass
+class Message:
+    bot: Bot
+    nick: str
+    channel: str
+    content: str
+    prefix: str = None
+    command: str = None
+    args: str = None
+    fullargs: str = None
+
+    def get_channel(self) -> Channel:
         return self.bot.get_channel(self.channel)
 
-    def get_stream(self):
+    def get_stream(self) -> Stream:
         return self.bot.get_stream(self.channel)
 
-    async def reply(self, content):
+    async def reply(self, content: str):
         await self.bot.send(self.channel, content)
 
     @classmethod
-    def from_irc(cls, bot, irc_msg):
-        msg = cls(bot)
-        msg.nick = irc_msg.nick
-        msg.channel = irc_msg.channel.removeprefix("#")
-        msg.content = irc_msg.content
-        return msg
+    def from_irc(cls, bot: Bot, irc_msg: irc.Message) -> Message:
+        return cls(
+            bot,
+            nick=irc_msg.nick,
+            channel=irc_msg.channel.removeprefix("#"),
+            content=irc_msg.content
+        )

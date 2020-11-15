@@ -1,27 +1,35 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from twitchplus import Bot
+
+from dataclasses import dataclass
+
 import arrow
 
+
+@dataclass
 class User:
-    __slots__ = ["bot", "id", "bio", "created_at", "display_name", "logo", "name", "type", "updated_at"]
-    def __init__(self, bot):
-        self.bot = bot
-        self.id = None
-        self.bio = None
-        self.created_at = None
-        self.display_name = None
-        self.logo = None
-        self.name = None
-        self.type = None
-        self.updated_at = None
+    bot: Bot
+    id: int
+    bio: str
+    created_at: arrow.Arrow
+    display_name: str
+    logo: str
+    name: str
+    type: str
+    updated_at: arrow.Arrow
 
     @classmethod
-    def from_json(cls, bot, j):
-        user = cls(bot)
-        user.id = int(j["id"])
-        user.bio = j["bio"]
-        user.created_at = arrow.get(j["created_at"])
-        user.display_name = j["display_name"]
-        user.logo = j["logo"]
-        user.name = j["name"]
-        user.type = j["type"]
-        user.updated_at = arrow.get(j["updated_at"])
-        return user
+    def from_json(cls, bot: Bot, j: dict) -> User:
+        return cls(
+            bot,
+            id = int(j["id"]),
+            bio = j["bio"],
+            created_at = arrow.get(j["created_at"]),
+            display_name = j["display_name"],
+            logo = j["logo"],
+            name = j["name"],
+            type = j["type"],
+            updated_at = arrow.get(j["updated_at"])
+        )

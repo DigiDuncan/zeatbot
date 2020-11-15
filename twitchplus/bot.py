@@ -2,9 +2,7 @@ import asyncio
 from functools import wraps
 import logging
 
-from twitch import TwitchClient
-
-from twitchplus.irc import IRC
+from twitchplus import irc, twitchv5
 from twitchplus.models import Channel, Message, Stream, User
 
 logger = logging.getLogger(__name__)
@@ -36,21 +34,20 @@ def streamer_only(message=None):
 
 
 class Bot():
-    __slots__ = ["nick", "prefix", "irc", "twapi", "_handlers", "_commands", "_user_ids"]
+    __slots__ = ["nick", "prefix", "irc", "t5", "_handlers", "_commands"]
 
     def __init__(self, nick, prefix=""):
         self.nick = nick
         self.prefix = prefix
         self.irc = None
-        self.twapi = None
+        self.t5 = None
         self._handlers = {}
         self._commands = {}
-        self._user_ids = {}
 
     async def connect(self, clientid, token, channels=None):
-        self.irc = IRC(self.nick)
+        self.irc = irc.IRC(self.nick)
         await self.irc.connect("irc.twitch.tv", 6667, password=f"oauth:{token}")
-        self.twapi = TwitchClient(client_id=clientid, oauth_token=token)
+        self.t5 = twitchv5.Client(clientid, token)
         if channels:
             for c in channels:
                 await self.join(c)
@@ -131,30 +128,19 @@ class Bot():
         self._add_handler("on_ready", fn)
         return fn
 
-    def get_user_id(self, name):
-        if name not in self._user_ids:
-            (userjson,) = self.twapi.users.translate_usernames_to_ids([name])
-            user = User.from_json(self, userjson)
-            self._user_ids[name] = user.id
-        return self._user_ids[name]
-
     def get_user(self, name):
-        userid = self.get_user_id(name)
-        userjson = self.twapi.users.get_by_id(userid)
-        user = User.from_json(self, userjson)
-        self._user_ids[user.name] = user.id
+        j = self.t5.get_user(name)
+        user = User.from_json(self, j)
         return user
 
     def get_channel(self, name):
-        userid = self.get_user_id(name)
-        channeljson = self.twapi.channels.get_by_id(userid)
-        channel = Channel.from_json(self, channeljson)
+        j = self.t5.get_channel(name)
+        channel = Channel.from_json(self, j)
         return channel
 
     def get_stream(self, name):
-        userid = self.get_user_id(name)
-        streamjson = self.twapi.streams.get_stream_by_user(userid)
-        stream = Stream.from_json(self, streamjson)
+        j = self.t5.get_stream(name)
+        stream = Stream.from_json(self, j)
         return stream
 
     async def send(self, channel, content):

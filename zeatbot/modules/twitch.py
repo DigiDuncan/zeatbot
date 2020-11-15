@@ -27,7 +27,7 @@ def register(bot):
     @bot.command
     async def uptime(msg):
         logger.info(f"{msg.nick} requested the uptime.")
-        stream = msg.get_stream()
+        stream = await msg.get_stream()
         if stream is None:
             await msg.reply("You're not streaming 4Head")
             return

@@ -17,11 +17,11 @@ class Message:
     args: str = None
     fullargs: str = None
 
-    def get_channel(self) -> Channel:
-        return self.bot.get_channel(self.channel)
+    async def get_channel(self) -> Channel:
+        return await self.bot.get_channel(self.channel)
 
-    def get_stream(self) -> Stream:
-        return self.bot.get_stream(self.channel)
+    async def get_stream(self) -> Stream:
+        return await self.bot.get_stream(self.channel)
 
     async def reply(self, content: str):
         await self.bot.send(self.channel, content)

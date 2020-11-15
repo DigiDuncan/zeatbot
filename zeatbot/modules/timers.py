@@ -18,7 +18,7 @@ def getTimedMessages():
 def register(bot):
     @bot.on_ready
     async def loop():
-        channel = bot.get_channel(conf.streamername)
+        channel = await bot.get_channel(conf.streamername)
         if conf.timedmessagedelay == 0:
             return
         delay_in_seconds = max(conf.timedmessagedelay, 1) * 60

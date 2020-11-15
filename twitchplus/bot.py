@@ -128,18 +128,18 @@ class Bot():
         self._add_handler("on_ready", fn)
         return fn
 
-    def get_user(self, name):
-        j = self.t5.get_user(name)
+    async def get_user(self, name):
+        j = await self.t5.get_user(name)
         user = User.from_json(self, j)
         return user
 
-    def get_channel(self, name):
-        j = self.t5.get_channel(name)
+    async def get_channel(self, name):
+        j = await self.t5.get_channel(name)
         channel = Channel.from_json(self, j)
         return channel
 
-    def get_stream(self, name):
-        j = self.t5.get_stream(name)
+    async def get_stream(self, name):
+        j = await self.t5.get_stream(name)
         stream = Stream.from_json(self, j)
         return stream
 

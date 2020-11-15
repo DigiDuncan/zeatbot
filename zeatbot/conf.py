@@ -34,6 +34,14 @@ clientid = None
 weather_token = None
 
 
+def loadline(p: Path):
+    try:
+        line = p.read_text().splitlines()[0].strip()
+    except FileNotFoundError:
+        line = ""
+    return line
+
+
 def load():
     global prefix, botname, streamername, displayname, timedmessagedelay
     global oauth, clientid
@@ -54,20 +62,16 @@ def load():
         timedmessagedelay = utils.getPath(configDict, "settings.timedmessagedelay", 1)
 
     # Load bot authtoken
-    try:
-        with open(oauthpath) as f:
-            oauth = f.readline().strip()
-    except FileNotFoundError as e:
+    oauth = loadline(oauthpath)
+    if not oauth:
         logger.error("OAuth token not found! Cannot log in.")
-        logger.warning(f"Place an authtoken file at {e.filename}.")
+        logger.warning(f"Place an authtoken file at {oauthpath}.")
 
     # Load client ID
-    try:
-        with open(clientidpath) as f:
-            clientid = f.readline().strip()
-    except FileNotFoundError as e:
+    clientid = loadline(clientidpath)
+    if not clientid:
         logger.error("Client ID not found! Cannot log in.")
-        logger.warning(f"Place an client ID file at {e.filename}.")
+        logger.warning(f"Place an client ID file at {clientidpath}.")
 
     # Load API authtokens
     if utils.hasPath(configDict, "tokens.weather"):

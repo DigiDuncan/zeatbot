@@ -5,9 +5,10 @@ import logging
 from twitch import TwitchClient
 
 from twitchplus.irc import IRC
-from twitchplus.models import Channel, Message, User
+from twitchplus.models import Channel, Message, Stream, User
 
 logger = logging.getLogger(__name__)
+
 
 def errwrapper(fn):
     @wraps(fn)
@@ -17,6 +18,7 @@ def errwrapper(fn):
         except Exception as e:
             logger.exception(e)
     return wrapper
+
 
 def streamer_only(message=None):
     def decorator(fn):
@@ -31,6 +33,7 @@ def streamer_only(message=None):
         message = None
         return decorator(fn)
     return decorator
+
 
 class Bot():
     __slots__ = ["nick", "prefix", "irc", "twapi", "_handlers", "_commands", "_user_ids"]
@@ -108,12 +111,14 @@ class Bot():
             fn = name
             self._add_command(fn.__name__, fn)
             return fn
+
         def command_deco(fn):
             nonlocal name
             if name is None:
                 name = fn.__name__
             self._add_command(fn.__name__, fn)
             return fn
+
         return command_deco
 
     def on_message(self, fn):
@@ -128,11 +133,14 @@ class Bot():
 
     def get_user_id(self, name):
         if name not in self._user_ids:
-            self.get_user(name)
+            (userjson,) = self.twapi.users.translate_usernames_to_ids([name])
+            user = User.from_json(self, userjson)
+            self._user_ids[name] = user.id
         return self._user_ids[name]
 
     def get_user(self, name):
-        (userjson,) = self.twapi.users.translate_usernames_to_ids([name])
+        userid = self.get_user_id(name)
+        userjson = self.tawpi.users.get_by_id(userid)
         user = User.from_json(self, userjson)
         self._user_ids[user.name] = user.id
         return user
@@ -145,7 +153,8 @@ class Bot():
 
     def get_stream(self, name):
         userid = self.get_user_id(name)
-        stream = self.twapi.streams.get_stream_by_user(userid)
+        streamjson = self.twapi.streams.get_stream_by_user(userid)
+        stream = Stream.from_json(self, streamjson)
         return stream
 
     async def send(self, channel, content):

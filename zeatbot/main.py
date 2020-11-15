@@ -50,7 +50,7 @@ def main():
     timers.register(bot)
 
     @bot.on_ready
-    async def on_ready(): 
+    async def on_ready():
         channel = bot.get_channel(conf.streamername)
         logger.info(f"Connected to IRC channel #{conf.streamername} as {conf.botname}.")
         await channel.send("I'm online!")

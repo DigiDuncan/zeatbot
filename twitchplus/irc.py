@@ -30,6 +30,7 @@ PARAM_RE = re.compile(" +([^ \x00\r\n]*)")
 
 class Message:
     __slots__ = ["nick", "user", "host", "command", "params", "tags", "raw"]
+
     def __init__(self, nick=None, user=None, host=None, command=None, params=None, tags=None, raw=None):
         self.command = command or ""
         self.nick = nick or ""
@@ -94,6 +95,7 @@ class Message:
 
 class IRC:
     __slots__ = ["nick", "_reader", "_writer", "_readbuffer"]
+
     def __init__(self, nick):
         self.nick = nick
         self._reader, self._writer = None, None
@@ -104,7 +106,7 @@ class IRC:
         if password is not None:
             await self._send(f"PASS {password}")
         await self._send(f"NICK {self.nick}")
-        
+
     async def join(self, channel):
         await self._send(f"JOIN {channel}")
 

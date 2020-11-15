@@ -4,4 +4,3 @@ from .stream import Stream
 from .user import User
 
 __all__ = ["Channel", "Message", "Stream", "User"]
-

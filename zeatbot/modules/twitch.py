@@ -1,11 +1,8 @@
 import logging
 
 import arrow
-import twitch
 
 from twitchplus import streamer_only
-from zeatbot import conf
-from zeatbot.lib.utils import removeprefix
 
 logger = logging.getLogger("zeatbot")
 

@@ -16,6 +16,7 @@ baked_cmds = [
     "weather"
 ]
 
+
 def load_customs():
     try:
         customs = toml.loads(conf.customsfile.read_text())
@@ -23,8 +24,10 @@ def load_customs():
         customs = {"commands": {}}
     return customs
 
+
 def save_customs(customs):
     conf.customsfile.write_text(toml.dumps(customs))
+
 
 def register(bot):
     @bot.on_message

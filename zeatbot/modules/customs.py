@@ -42,7 +42,7 @@ async def try_customs(irc, message):
         customs = toml.load(customsfile)
     except FileNotFoundError:
         logger.warn("Commands file not found. Making a blank one.")
-        with open(customsfile) as f:
+        with open(customsfile, "w+") as f:
             f.write("[commands]\r\n")
         return
     for k, v in customs["commands"].items():
@@ -65,7 +65,7 @@ async def add(irc, args):
         logger.warn(f"Tried to add {newcmd}, but it's already a command!")
         return
     customs["commands"][newcmd] = newout
-    with conf.customsfile.open("w") as f:
+    with conf.customsfile.open("w+") as f:
         toml.dump(customs, f)
 
 
@@ -81,5 +81,5 @@ async def remove(irc, args):
         logger.warn(f"Tried to remove {cmd}, but it's not a command!")
         return
     del customs["commands"][cmd]
-    with conf.customsfile.open("w") as f:
+    with conf.customsfile.open("w+") as f:
         toml.dump(customs, f)

@@ -35,7 +35,7 @@ async def streamtitle(irc, client, channel, title: str):
 
 
 async def gamename(irc, client, channel, name: str):
-    client.channels.update(game = name)
+    client.channels.update(channel.id, game = name)
     logger.info(f"Updating game to {name!r}")
 
 
